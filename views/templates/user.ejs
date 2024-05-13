@@ -1,0 +1,9 @@
+<li>
+  <%= user.username %>: <%= user.user_type %>
+  <form action="/promote/<%= user._id %>" method="post">
+    <button>Promote to Admin</button>
+  </form>
+  <form action="/demote/<%= user._id %>" method="post">
+    <button>Demote to User</button>
+  </form>
+</li>
