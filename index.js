@@ -125,13 +125,13 @@ app.post("/signupSubmit", async (req, res) => {
     username: username,
     email: email,
     password: hashedPassword,
+    user_type: "user"
   });
   console.log("Inserted user", user);
   req.session.id = user._id;
   req.session.authenticated = true;
   req.session.username = username;
   req.session.email = email;
-  req.session.user_type = "user";
   req.session.cookie.maxAge = expireTime;
 
   res.redirect("/members");
@@ -226,23 +226,47 @@ app.get("/user", sessionValidation, adminAuthorization, async (req, res) => {
 });
 
 app.post("/promote/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const schema = Joi.object({
+    id: Joi.string().required(),
+  });
+
+  const validationResult = schema.validate({ id });
+
+  if (validationResult.error != null) {
+    return;
+  }
+
   await userCollection.updateOne(
-    { _id: new ObjectId(req.params.id) },
+    { _id: new ObjectId(id) },
     { $set: { user_type: "admin" } }
   );
-  console.log(req.session);
-  if (req.session._id === req.params.id) {
+
+  if (req.session._id === id) {
     req.session.user_type = "admin";
   }
   res.redirect("/admin");
 });
 
 app.post("/demote/:id", async (req, res) => {
+  const id = req.params.id;
+
+  const schema = Joi.object({
+    id: Joi.string().required(),
+  });
+
+  const validationResult = schema.validate({ id });
+
+  if (validationResult.error != null) {
+    return;
+  }
+
   await userCollection.updateOne(
-    { _id: new ObjectId(req.params.id) },
+    { _id: new ObjectId(id) },
     { $set: { user_type: "user" } }
   );
-  if (req.session._id === req.params.id) {
+  if (req.session._id === id) {
     req.session.user_type = "user";
   }
   res.redirect("/admin");
